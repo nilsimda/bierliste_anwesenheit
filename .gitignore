@@ -1,3 +1,9 @@
+# weird mac things
+.DS_Store
+
+# my local scripts
+*.sh
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
