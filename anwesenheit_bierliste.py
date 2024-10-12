@@ -29,7 +29,7 @@ def accept_cookies():
 def login():
     driver.find_element(by=By.ID, value="loginTrigger").click()
     driver.find_element(By.ID, "inputUsername_top").send_keys(USERNAME)
-    driver.find_element(By.ID, "inputPassword_top").send_keys("Dr7i9MxqHP")
+    driver.find_element(By.ID, "inputPassword_top").send_keys(PASSWORD)
     driver.find_element(By.XPATH, "//button[text()='login']").click()
 
 
