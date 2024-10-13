@@ -55,12 +55,18 @@ def generate_markdown_table(data):
     )
     separator = "|-" + "-|-".join("-" * width for width in col_widths) + "-|"
 
+    emoji_map = {"ja": ":+1:", "nein": ":-1:", "?": ":grey_question:"}
     # Generate the data rows
     rows = []
     for row in data[1:]:
+        mapped_row = [
+            emoji_map[entry] if entry in emoji_map else entry for entry in row
+        ]
         rows.append(
             "| "
-            + " | ".join(str(row[i]).ljust(col_widths[i]) for i in range(len(row)))
+            + " | ".join(
+                str(mapped_row[i]).ljust(col_widths[i]) for i in range(len(row))
+            )
             + " |"
         )
 
@@ -69,6 +75,8 @@ def generate_markdown_table(data):
 
 
 def parse_table(table_html):
+    ignore_players = ["Thomas", "Wile", "Amin", "Nanda"]
+
     soup = BeautifulSoup(table_html, "html.parser")
 
     thead = soup.find("thead").find("tr")
@@ -97,7 +105,9 @@ def parse_table(table_html):
                     span = column.find("span", attrs={"data-value": True})
                     if span:
                         row_data.append(span["data-value"])
-            if len(row_data) > 1:
+            if len(row_data) > 1 and not any(
+                row_data[0].startswith(player) for player in ignore_players
+            ):
                 table_data.append(row_data)
 
     return table_data
