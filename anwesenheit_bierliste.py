@@ -105,6 +105,20 @@ def parse_table(table_html):
                     span = column.find("span", attrs={"data-value": True})
                     if span:
                         row_data.append(span["data-value"])
+                    else:
+                        button = column.find("button")
+                        if button:
+                            i_el = button.find("span").find("i")
+                            if not i_el:
+                                row_data.append("")
+                            else:
+                                map = {
+                                    "fa-thumbs-down": "nein",
+                                    "fa-thumbs-up": "ja",
+                                    "fa-question": "?",
+                                }
+                                row_data.append(map[i_el["class"][1]])
+
             if len(row_data) > 1 and not any(
                 row_data[0].startswith(player) for player in ignore_players
             ):
