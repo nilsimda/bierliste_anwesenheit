@@ -7,7 +7,7 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from github import Auth, Github, InputFileContent
 from bs4 import BeautifulSoup
-from datetime import datetime
+from datetime import datetime, timedelta
 
 
 def init_driver():
@@ -74,25 +74,25 @@ def generate_markdown_table(data):
     return "\n".join([header, separator] + rows)
 
 
-def parse_table(table_html):
-    ignore_players = ["Thomas", "Wile", "Amin", "Nanda"]
-
-    soup = BeautifulSoup(table_html, "html.parser")
-
+def parse_header(soup):
     thead = soup.find("thead").find("tr")
-    tbody = soup.find("tbody")
     header_data = [" "]
 
     for column in thead.find_all("th"):
         span = column.find("span", attrs={"title": True})
         if span:
-            header_data.append(span["title"].split(",")[0])
+            header_data.append(span.contents[0])
         else:
             a = column.find("a", attrs={"title": True})
             if a:
-                header_data.append(a["title"].split(">")[1][:-3])
+                header_data.append(a.contents[0])
 
-    table_data = [header_data]
+    return header_data
+
+
+def parse_body(soup, ignore_players):
+    tbody = soup.find("tbody")
+    body_data = []
 
     for row in tbody.find_all("tr"):
         columns = row.find_all("td")
@@ -122,9 +122,30 @@ def parse_table(table_html):
             if len(row_data) > 1 and not any(
                 row_data[0].startswith(player) for player in ignore_players
             ):
-                table_data.append(row_data)
+                body_data.append(row_data)
+
+    return body_data
+
+
+def parse_table(table_html):
+    ignore_players = ["Thomas", "Wile", "Amin", "Nanda"]
+
+    soup = BeautifulSoup(table_html, "html.parser")
+
+    table_data = [parse_header(soup)]
+    table_data += parse_body(soup, ignore_players)
 
     return table_data
+
+
+def is_practice_tomorrow(parsed_header):
+    today = datetime.today()
+    tomorrow = today + timedelta(days=1)
+    input_date = datetime.strptime(parsed_header[1].split(", ")[1], "%d.%m").replace(
+        year=tomorrow.year
+    )
+
+    return input_date.date() == tomorrow.date()
 
 
 def upload_to_gist(content):
@@ -141,10 +162,10 @@ def upload_to_gist(content):
 
 
 if __name__ == "__main__":
-    AUTH_TOKEN = os.environ.get("GITHUB_AUTH_TOKEN")
-    USERNAME = os.environ.get("VOLLEYBALL_USERNAME")
-    PASSWORD = os.environ.get("VOLLEYBALL_PASSWORD")
-    GIST_ID = os.environ.get("GIST_ID_VOLLEYBALL")
+    AUTH_TOKEN = os.environ.get("GITHUB_AUTH_TOKEN", default="")
+    USERNAME = os.environ.get("VOLLEYBALL_USERNAME", default="")
+    PASSWORD = os.environ.get("VOLLEYBALL_PASSWORD", default="")
+    GIST_ID = os.environ.get("GIST_ID_VOLLEYBALL", default="")
     URL = "https://www.volleyball-freizeit.de/"
     TEAM_URL = URL + "team/administration/369"
 
@@ -164,9 +185,14 @@ if __name__ == "__main__":
     print("Got Attendance table.")
 
     table_data = parse_table(table_html)
-    markdown_table = generate_markdown_table(table_data)
-    print("Parsed table to markdown.")
+    if is_practice_tomorrow(table_data[0]):
+        markdown_table = generate_markdown_table(table_data)
+        print("Parsed table to markdown.")
 
-    update_md = f"#### Last Update: {datetime.now().strftime('%d %B %Y %H:%M')}\n"
-    content = update_md + markdown_table
-    upload_to_gist(content)
+        update_md = f"#### Last Update: {datetime.now().strftime('%d %B %Y %H:%M')}\n"
+        content = update_md + markdown_table
+        upload_to_gist(content)
+    else:
+        print(
+            f"Next practice is on {table_data[0][1]}, which is not tomorrow. There is nothing to do."
+        )
