@@ -138,14 +138,10 @@ def parse_table(table_html):
     return table_data
 
 
-def is_practice_tomorrow(parsed_header):
-    today = datetime.today()
-    tomorrow = today + timedelta(days=1)
-    input_date = datetime.strptime(parsed_header[1].split(", ")[1], "%d.%m").replace(
-        year=tomorrow.year
+def get_next_practice(parsed_header):
+    return datetime.strptime(parsed_header[1].split(", ")[1], "%d.%m").replace(
+        year=datetime.today().year
     )
-
-    return input_date.date() == tomorrow.date()
 
 
 def upload_to_gist(content):
@@ -185,13 +181,20 @@ if __name__ == "__main__":
     print("Got Attendance table.")
 
     table_data = parse_table(table_html)
-    if is_practice_tomorrow(table_data[0]):
+    today = datetime.today()
+    tomorrow = today + timedelta(days=1)
+    next_practice = get_next_practice(table_data[0])
+
+    if tomorrow == next_practice:
         markdown_table = generate_markdown_table(table_data)
         print("Parsed table to markdown.")
 
         update_md = f"#### Last Update: {datetime.now().strftime('%d %B %Y %H:%M')}\n"
         content = update_md + markdown_table
         upload_to_gist(content)
+    elif today == next_practice:
+        # TODO: this should compare with the entries from yesterday
+        pass
     else:
         print(
             f"Next practice is on {table_data[0][1]}, which is not tomorrow. There is nothing to do."
