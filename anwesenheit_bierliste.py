@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 
 import os
+import pickle
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
@@ -157,6 +158,12 @@ def upload_to_gist(content):
     print("Uploaded to Gist.")
 
 
+def update_bierlist(table_data):
+    bierliste = {name: 0 for name in list(zip(*table_data))[0][1:]}
+    with open("bierliste.pickle", "wb") as f:
+        pickle.dump(bierliste, f)
+
+
 if __name__ == "__main__":
     AUTH_TOKEN = os.environ.get("GITHUB_AUTH_TOKEN", default="")
     USERNAME = os.environ.get("VOLLEYBALL_USERNAME", default="")
@@ -181,7 +188,7 @@ if __name__ == "__main__":
     print("Got Attendance table.")
 
     table_data = parse_table(table_html)
-    today = datetime.today()
+    today = datetime.today().replace(hour=0, minute=0, second=0, microsecond=0)
     tomorrow = today + timedelta(days=1)
     next_practice = get_next_practice(table_data[0])
 
@@ -197,5 +204,6 @@ if __name__ == "__main__":
         pass
     else:
         print(
-            f"Next practice is on {table_data[0][1]}, which is not tomorrow. There is nothing to do."
+            f"Next practice is on {table_data[0][1]}, which is not tomorrow ({tomorrow}). There is nothing to do."
         )
+    update_bierlist(table_data)
