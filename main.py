@@ -12,7 +12,7 @@ from utils.volleyball_freizeit_bot import VolleyballFreizeitBot
 def update_change(values, attendance_new, attendance_old):
     n_beers = 0
     for key in attendance_new:
-        if attendance_new[key] != attendance_old[key]:
+        if attendance_old[key] != "x" and attendance_new[key] != attendance_old[key]:
             values[key] += 1
             n_beers += 1
     return n_beers
@@ -22,6 +22,7 @@ def update_noentry(values, attendace):
     n_beers = 0
     for key, value in attendace.items():
         if value == "?" or value == "":
+            attendace[key] = "x" #mark missed entries so they dont get added twice
             values[key] += 1
             n_beers += 1
     return n_beers
@@ -48,11 +49,12 @@ if __name__ == "__main__":
         sheets_helper = SheetsHelper(SHEETS_ID, CREDS_PATH, TOKEN_PATH)
         values = sheets_helper.dowload_from_sheets()
 
+        n_beers = update_noentry(values, attendance)
+        print(f"{n_beers} beers added.")
+
         with open("attendance1400.pickle", "wb") as f:
             pickle.dump(attendance, f)
 
-        n_beers = update_noentry(values, attendance)
-        print(f"{n_beers} beers added.")
         sheets_helper.upload_to_sheets(values)
 
     elif today == next_practice and datetime.today().hour == 20:
