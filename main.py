@@ -18,11 +18,11 @@ def update_change(values, attendance_new, attendance_old):
     return n_beers
 
 
-def update_noentry(values, attendace):
+def update_noentry(values, attendance):
     n_beers = 0
-    for key, value in attendace.items():
+    for key, value in attendance.items():
         if value == "?" or value == "":
-            attendace[key] = "x" #mark missed entries so they dont get added twice
+            attendance[key] = "x" #mark missed entries so they dont get added twice
             values[key] += 1
             n_beers += 1
     return n_beers
@@ -33,6 +33,7 @@ if __name__ == "__main__":
     SHEETS_ID = os.environ.get("SHEETS_ID", default="")
     CREDS_PATH = os.environ.get("CREDS_PATH", default="")
     TOKEN_PATH = os.environ.get("TOKEN_PATH", default="")
+    DEBUG = 1
 
     vf_bot = VolleyballFreizeitBot(USERNAME, PASSWORD)
     table_html = vf_bot.get_table()
@@ -58,6 +59,30 @@ if __name__ == "__main__":
         sheets_helper.upload_to_sheets(values)
 
     elif today == next_practice and datetime.today().hour == 20:
+        attendance_new = parser.get_attendance()
+        sheets_helper = SheetsHelper(SHEETS_ID, CREDS_PATH, TOKEN_PATH)
+        values = sheets_helper.dowload_from_sheets()
+
+        with open("attendance1400.pickle", "rb") as f:
+            attendance_old = pickle.load(f)
+
+        n_beers = update_change(values, attendance_new, attendance_old)
+        print(f"{n_beers} beers added.")
+        sheets_helper.upload_to_sheets(values)
+
+    elif DEBUG:
+        attendance = parser.get_attendance()
+        sheets_helper = SheetsHelper(SHEETS_ID, CREDS_PATH, TOKEN_PATH)
+        values = sheets_helper.dowload_from_sheets()
+
+        n_beers = update_noentry(values, attendance)
+        print(f"{n_beers} beers added.")
+
+        with open("attendance1400.pickle", "wb") as f:
+            pickle.dump(attendance, f)
+
+        sheets_helper.upload_to_sheets(values)
+
         attendance_new = parser.get_attendance()
         sheets_helper = SheetsHelper(SHEETS_ID, CREDS_PATH, TOKEN_PATH)
         values = sheets_helper.dowload_from_sheets()

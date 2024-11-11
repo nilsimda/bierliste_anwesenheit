@@ -63,7 +63,7 @@ class SheetsHelper:
             )
             values = result.get("values", [])
             print("Downloaded values from sheets...")
-            return {name : value for name, value in values}
+            return {name : int(value) for name, value in values}
         except HttpError as err:
             print(err)
 

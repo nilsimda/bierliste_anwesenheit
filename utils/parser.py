@@ -72,5 +72,5 @@ class Parser:
 
     def get_attendance(self):
         table_cols = list(zip(*self.table_data))
-        return {name: value for name, value in zip(table_cols[0][1:], table_cols[1])}
+        return {name: value for name, value in zip(table_cols[0][1:], table_cols[1][1:])}
 
