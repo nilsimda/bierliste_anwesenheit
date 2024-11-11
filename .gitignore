@@ -1,3 +1,7 @@
+# secrets and db
+*.json
+*.pickle
+
 # weird mac things
 .DS_Store
 
