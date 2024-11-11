@@ -12,6 +12,7 @@ class VolleyballFreizeitBot:
         options = webdriver.ChromeOptions()
         options.add_argument("--headless")
         self.driver = webdriver.Chrome(options=options)
+        self.driver.get(TEAM_URL)
         self.username = username
         self.password = password
 
