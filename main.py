@@ -46,7 +46,7 @@ if __name__ == "__main__":
     tomorrow = today + timedelta(days=1)
     yesterday = today - timedelta(days=1)
 
-    print(f"-----{today}----")
+    print(f"-----{datetime.now()}----")
 
     if tomorrow == next_practice and datetime.today().hour == 14:
         attendance = parser.get_attendance()
