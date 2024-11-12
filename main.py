@@ -15,6 +15,7 @@ def update_change(values, attendance_new, attendance_old):
         if attendance_old[key] != "x" and attendance_new[key] != attendance_old[key]:
             values[key] += 1
             n_beers += 1
+            print(f"{key} hat seinen/ihren Eintrag zu spät geändert.")
     return n_beers
 
 
@@ -24,6 +25,7 @@ def update_noentry(values, attendance):
         if value == "?" or value == "":
             attendance[key] = "x" #mark missed entries so they dont get added twice
             values[key] += 1
+            print(f"{key} hat sich nicht rechtzeitig eingetragen.")
             n_beers += 1
     return n_beers
 
