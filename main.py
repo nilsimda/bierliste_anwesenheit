@@ -39,13 +39,14 @@ if __name__ == "__main__":
     vf_bot = VolleyballFreizeitBot(USERNAME, PASSWORD)
     table_html = vf_bot.get_table()
     vf_bot.quit()
-    print("Got Attendance table.")
 
     parser = Parser(table_html)
     next_practice, next_next_practice = parser.next_practices()
     today = datetime.today().replace(hour=0, minute=0, second=0, microsecond=0)
     tomorrow = today + timedelta(days=1)
     yesterday = today - timedelta(days=1)
+
+    print(f"-----{today}----")
 
     if tomorrow == next_practice and datetime.today().hour == 14:
         attendance = parser.get_attendance()
@@ -66,7 +67,7 @@ if __name__ == "__main__":
         values = sheets_helper.dowload_from_sheets()
 
         n_beers = update_noentry(values, attendance)
-        print(f"{n_beers} beers added.")
+        print(f"{n_beers} Biere hinzugefügt.")
 
         with open(f"attendance_{today}.pickle", "wb") as f:
             pickle.dump(attendance, f)
@@ -80,12 +81,11 @@ if __name__ == "__main__":
 
         with open(f"attendance_{yesterday}.pickle", "rb") as f:
             attendance_old = pickle.load(f)
-
         n_beers = update_change(values, attendance_new, attendance_old)
-        print(f"{n_beers} beers added.")
+        print(f"{n_beers} Biere hinzugefügt.")
         sheets_helper.upload_to_sheets(values)
 
     else:
         print(
-            f"Next practice/game is on {next_practice}, which is not today ({today}) or tomorrow ({tomorrow}). There is nothing to do."
+            f"Nächstes Training/Spiel ist am {next_practice}, also nicht heute ({today}) oder morgen ({tomorrow}). Es gibt nichts zu tun."
         )

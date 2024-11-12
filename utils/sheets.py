@@ -47,7 +47,6 @@ class SheetsHelper:
                     body=body,)
                 .execute()
             )
-            print("Uploaded to sheets!")
         except HttpError as err:
             print(err)
 
@@ -62,7 +61,6 @@ class SheetsHelper:
                 .execute()
             )
             values = result.get("values", [])
-            print("Downloaded values from sheets...")
             return {name : int(value) for name, value in values}
         except HttpError as err:
             print(err)
