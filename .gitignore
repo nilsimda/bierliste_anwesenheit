@@ -1,3 +1,5 @@
+# logs
+*.log
 # secrets and db
 *.json
 *.pickle
