@@ -64,13 +64,17 @@ class Parser:
 
         return body_data
 
-    def next_practice(self):
-        next_date = self.table_data[0][1] # first row second column
-        return datetime.strptime(next_date.split(", ")[1], "%d.%m").replace(
+    @staticmethod
+    def _parse_date(date):
+        return datetime.strptime(date.split(", ")[1], "%d.%m").replace(
             year=datetime.today().year
         )
 
-    def get_attendance(self):
+    def next_practices(self):
+        _, next_date, next_next_date, *_ = self.table_data[0] 
+        return Parser._parse_date(next_date), Parser._parse_date(next_next_date)
+
+    def get_attendance(self, day=1):
         table_cols = list(zip(*self.table_data))
-        return {name: value for name, value in zip(table_cols[0][1:], table_cols[1][1:])}
+        return {name: value for name, value in zip(table_cols[0][1:], table_cols[day][1:])}
 
