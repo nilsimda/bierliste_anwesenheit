@@ -54,7 +54,7 @@ if __name__ == "__main__":
         values = sheets_helper.dowload_from_sheets()
 
         n_beers = update_noentry(values, attendance)
-        print(f"{n_beers} beers added.")
+        print(f"{n_beers} Biere hinzugefügt.")
 
         with open(f"attendance_{today}.pickle", "wb") as f:
             pickle.dump(attendance, f)
